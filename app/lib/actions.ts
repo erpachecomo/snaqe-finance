@@ -1,8 +1,10 @@
 "use server";
 
+import { AuthError } from "next-auth";
 import postgres from "postgres";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { signIn } from "@/auth";
 import { z } from "zod";
 
 export type State = {
@@ -55,8 +57,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
   `;
   } catch (e) {
-    console.error(e)
-    return {  message: "Database error: Failed to Create Invoice" };
+    console.error(e);
+    return { message: "Database error: Failed to Create Invoice" };
   }
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
@@ -86,7 +88,7 @@ export async function updateInvoice(
       WHERE id = ${id}
     `;
   } catch (e) {
-    console.error(e)
+    console.error(e);
     return {
       message: "Database Error: Failed to Update Invoice",
     };
@@ -99,7 +101,26 @@ export async function deleteInvoice(id: string) {
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
   revalidatePath("/dashboard/invoices");
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData
+) {
+  try {
+    await signIn("credentials", formData);
+  } catch (error) {
+    if(error instanceof AuthError){
+        switch (error.type){
+            case 'CredentialsSignin':
+                return 'Invalid credentials.';
+              default:
+                return 'Something went wrong.';
+        }
+    }
+    throw error;
+  }
 }
