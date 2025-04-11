@@ -6,10 +6,14 @@ import {
 
 import CardWrapper from "@/app/ui/dashboard/cards";
 import LatestInvoices from "@/app/ui/dashboard/latest-invoices";
+import { Metadata } from "next";
 import RevenueChart from "@/app/ui/dashboard/revenue-chart";
 import { Suspense } from "react";
 import { lusitana } from "@/app/ui/fonts";
 
+export const metadata: Metadata = {
+  title: "Dashboard",
+};
 export default async function Page() {
   return (
     <main>
